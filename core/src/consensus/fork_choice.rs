@@ -390,11 +390,14 @@ fn can_vote_on_candidate_bank(
         && propagation_confirmed
         && switch_fork_decision.can_vote()
     {
+        if candidate_vote_bank.slot() != *last_logged_vote_slot {
         info!(
             "voting: {} {:.1}%",
             candidate_vote_bank_slot,
             100.0 * fork_weight
         );
+            *last_logged_vote_slot = candidate_vote_bank.slot();
+        }
         true
     } else {
         false
@@ -423,6 +426,7 @@ pub fn select_vote_and_reset_forks(
     tower: &mut Tower,
     latest_validator_votes_for_frozen_banks: &LatestValidatorVotesForFrozenBanks,
     fork_choice: &HeaviestSubtreeForkChoice,
+    last_logged_vote_slot: &mut Slot,
 ) -> SelectVoteAndResetForkResult {
     // Try to vote on the actual heaviest fork. If the heaviest bank is
     // locked out or fails the threshold check, the validator will:
